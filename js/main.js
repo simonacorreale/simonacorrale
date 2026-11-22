@@ -537,6 +537,19 @@ if (menoMovimento) {
     setTimeout(apriVentaglio, 300);
   }
 
+  // Il resto della pagina (sotto la hero) aspetta la fine della hero, poi compare un elemento alla volta
+  const PASSO_RESTO = 150; // ms tra un elemento e il successivo
+  let restoPronto = false;
+  const restoInAttesa = [];
+  function liberaResto() {
+    if (restoPronto) return;
+    restoPronto = true;
+    restoInAttesa.forEach((el, i) => {
+      el.style.setProperty('--ritardo', `${(i * PASSO_RESTO) / 1000}s`);
+      el.classList.add('visibile');
+    });
+  }
+
   let titoloFinito = false;
   function fineTitolo() {
     if (titoloFinito) return; // può arrivare due volte (fine animazione + timer di sicurezza)
@@ -547,6 +560,7 @@ if (menoMovimento) {
       setTimeout(() => {
         introFinita = true;
         mostraCarte();
+        setTimeout(liberaResto, 300 + DURATA_VENTAGLIO); // dopo che le card si sono aperte
       }, DURATA_OCCHIO);
     }, DOPO_DOMANDA);
   }
@@ -564,6 +578,10 @@ if (menoMovimento) {
     if (el === area) {
       areaInVista = true;
       mostraCarte();
+      return;
+    }
+    if (!restoPronto && !el.closest('.intro, .header')) {
+      restoInAttesa.push(el);
       return;
     }
     el.classList.add('visibile');
