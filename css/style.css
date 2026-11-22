@@ -21,6 +21,9 @@
   --menu-sfondo: #202129;
   --menu-bordo: #3b3c48;
   --menu-attivo: #34304d;
+  --altezza-header: 84px;
+  /* Grana (puntini chiari, intensità = opacity nell'SVG): sito, sfondo della modale e carta della modale */
+  --grana: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 2 -0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='0.16' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
 /* ---------- Base ---------- */
@@ -28,17 +31,17 @@
 *::before,
 *::after { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
 
 /* ---------- Animazioni d'ingresso ----------
    Gli elementi .rivela compaiono salendo quando entrano nello schermo
    (js/main.js aggiunge .visibile). --ritardo crea l'effetto a cascata. */
 .animazioni .rivela {
   opacity: 0;
-  translate: 0 40px;
+  translate: 0 24px;
   transition:
-    opacity 0.9s ease-out var(--ritardo, 0s),
-    translate 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--ritardo, 0s);
+    opacity 0.6s ease-out var(--ritardo, 0s),
+    translate 0.6s cubic-bezier(0.22, 1, 0.36, 1) var(--ritardo, 0s);
 }
 .animazioni .rivela--alto { translate: 0 -30px; } /* l'header scende dall'alto */
 .animazioni .rivela.visibile { opacity: 1; translate: none; }
@@ -58,17 +61,16 @@ body {
   color: var(--testo);
   font-family: "Roboto", system-ui, sans-serif;
   overflow-x: hidden;
-  /* La pagina è alta quanto la finestra: header + intro, le card prendono lo spazio che resta */
+  /* Header + intro riempiono la prima schermata, poi si scorre alle sezioni successive */
   display: flex;
   flex-direction: column;
-  height: 100dvh;
 }
 
 img { display: block; }
 
 a { color: inherit; }
 
-/* ---------- Schermata d'apertura: bacchetta magica ---------- */
+/* ---------- Schermata d'apertura: scia che segue il mouse ---------- */
 /* Visibile solo con JS attivo (senza JS si vede direttamente il sito) */
 .magia { display: none; }
 
@@ -83,37 +85,51 @@ a { color: inherit; }
   gap: 28px;
   background: var(--sfondo);
   transition: opacity 0.8s ease;
+  touch-action: none; /* su mobile il dito disegna la scia invece di far scorrere la schermata */
 }
 
-.intro-attiva { overflow: hidden; } /* niente scroll della pagina finché c'è la bacchetta */
+.intro-attiva { overflow: hidden; } /* niente scroll della pagina finché c'è la schermata */
+
+/* Canvas della scia: copre la schermata e non blocca i click */
+.magia__scia {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
 
 .magia__bacchetta {
   padding: 0;
   border: 0;
   background: none;
   cursor: pointer;
+  /* Spostamento e inclinazione quando segue il mouse (impostati da js/main.js) */
+  translate: var(--tx, 0px) var(--ty, 0px);
+  rotate: var(--rot, 0deg);
+}
+.magia__bacchetta svg {
+  display: block;
+  transform: rotate(20deg); /* uguale all'inizio dell'animazione: nessun salto al primo fotogramma */
   animation: bacchetta-fluttua 3s ease-in-out infinite;
 }
-.magia__bacchetta svg { display: block; transform: rotate(25deg); }
 .magia__bacchetta:focus-visible { outline: 3px dashed var(--lilla); outline-offset: 12px; border-radius: 20px; }
 
 @keyframes bacchetta-fluttua {
-  0%, 100% { transform: translateY(0) rotate(-5deg); }
-  50%      { transform: translateY(-16px) rotate(5deg); }
+  0%, 100% { transform: translateY(0) rotate(20deg); }
+  50%      { transform: translateY(-16px) rotate(30deg); }
 }
 
-/* Le scintille attorno alla stella brillano a turno */
-.magia__brillio {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: brilla 1.8s ease-in-out infinite;
-}
-.magia__brillio:nth-of-type(2) { animation-delay: -0.6s; }
-.magia__brillio:nth-of-type(3) { animation-delay: -1.2s; }
+/* Desktop: la bacchetta fa da cursore */
+.magia--segue,
+.magia--segue .magia__bacchetta { cursor: none; }
 
-@keyframes brilla {
-  0%, 100% { opacity: 0.25; transform: scale(0.5); }
-  50%      { opacity: 1; transform: scale(1.1); }
+/* Lancio: colpo di bacchetta */
+.magia--lancio .magia__bacchetta svg { animation: bacchetta-colpo 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) forwards; }
+@keyframes bacchetta-colpo {
+  0%   { transform: rotate(25deg); }
+  40%  { transform: translateY(-12px) rotate(-5deg); }
+  100% { transform: translateY(-4px) rotate(45deg) scale(1.08); }
 }
 
 .magia__testo {
@@ -125,44 +141,29 @@ a { color: inherit; }
   text-align: center;
 }
 
+/* Testo diverso: desktop (mouse) "agita o scorri", mobile "scorri" */
+.magia__testo-desktop { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .magia__testo-desktop { display: inline; }
+  .magia__testo-mobile { display: none; }
+}
+
 .magia__freccia { animation: rimbalza 1.4s ease-in-out infinite; }
 @keyframes rimbalza {
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(8px); }
 }
 
-/* Lancio: colpo di bacchetta, poi la schermata svanisce */
-.magia--lancio .magia__bacchetta { animation: bacchetta-colpo 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) forwards; }
-@keyframes bacchetta-colpo {
-  0%   { transform: none; }
-  40%  { transform: translateY(-12px) rotate(-28deg); }
-  100% { transform: translateY(-4px) rotate(18deg) scale(1.08); }
-}
+/* Lancio: la schermata svanisce */
 .magia--chiusura { opacity: 0; pointer-events: none; }
-
-/* Scintille che esplodono dalla stella (create da js/main.js) */
-.magia__scintilla {
-  position: fixed;
-  z-index: 101;
-  left: var(--x);
-  top: var(--y);
-  color: var(--colore);
-  font-size: var(--dim);
-  line-height: 1;
-  pointer-events: none;
-  animation: esplodi 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
-}
-@keyframes esplodi {
-  0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.3); }
-  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(200deg); }
-}
 
 /* ---------- Header ---------- */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 84px;
+  height: var(--altezza-header);
+  scroll-snap-align: start;
   flex-shrink: 0;
   padding: 10px 60px;
   position: relative;
@@ -261,9 +262,8 @@ a { color: inherit; }
 /* ---------- Intro ---------- */
 .intro {
   display: flex;
-  flex: 1;
-  min-height: 0;
-  overflow: clip; /* le animazioni d'ingresso (elementi che salgono dal basso) non creano scroll */
+  height: calc(100dvh - var(--altezza-header));
+  overflow-x: clip; /* niente scroll orizzontale; in basso le card possono uscire (scorrendo non vengono tagliate) */
   position: relative;
   flex-direction: column;
   align-items: center;
@@ -320,16 +320,16 @@ body::after {
 }
 
 .animazioni .intro__titolo.visibile .lettera {
-  --entrata: calc(0.3s + var(--i) * 0.05s);  /* cascata lettera per lettera */
-  --riempi: calc(2.1s + var(--i) * 0.04s);   /* parte quando tutte sono arrivate */
+  --entrata: calc(0.15s + var(--i) * 0.03s);  /* cascata lettera per lettera */
+  --riempi: calc(1s + var(--i) * 0.025s);   /* parte a onda mentre le ultime stanno arrivando */
   animation:
-    lettera-fluttua 1.1s cubic-bezier(0.3, 1.3, 0.5, 1) var(--entrata) both,
-    lettera-riempi 0.7s ease-out var(--riempi) forwards;
+    lettera-fluttua 0.8s cubic-bezier(0.25, 1.15, 0.5, 1) var(--entrata) both,
+    lettera-riempi 0.5s ease-out var(--riempi) forwards;
 }
 
 @keyframes lettera-fluttua {
-  0%   { opacity: 0; transform: translateY(0.6em) rotate(-8deg); filter: blur(6px); }
-  55%  { opacity: 1; transform: translateY(-0.15em) rotate(3deg); filter: blur(0); }
+  0%   { opacity: 0; transform: translateY(0.6em) rotate(-5deg); filter: blur(6px); }
+  55%  { opacity: 1; transform: translateY(-0.15em) rotate(2deg); filter: blur(0); }
   78%  { transform: translateY(0.05em) rotate(-1deg); }
   100% { opacity: 1; transform: none; filter: none; }
 }
@@ -342,7 +342,7 @@ body::after {
 
 .intro__titolo {
   color: var(--lilla);
-  font-size: clamp(32px, min(6vw, 7vh), 60px);
+  font-size: 40px;
   font-weight: 600;
   letter-spacing: 4.2px;
 }
@@ -365,7 +365,7 @@ body::after {
 /* Entrata "magica" dell'occhio: da piccolo, ruotato e sfocato a grande con bagliore, poi si assesta */
 .animazioni .occhio.rivela { translate: none; transition: none; }
 .animazioni .occhio.visibile {
-  animation: occhio-magia 1.2s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  animation: occhio-magia 0.8s cubic-bezier(0.3, 1.3, 0.5, 1) both;
 }
 @keyframes occhio-magia {
   0%   { opacity: 0; transform: scale(0.2) rotate(-30deg); filter: blur(8px); }
@@ -394,7 +394,7 @@ body::after {
   flex: 1;           /* occupa lo spazio rimasto sotto i testi */
   min-height: 220px;
   width: 100%;
-  overflow: hidden;
+  overflow-x: clip; /* le card laterali escono dai lati, ma in basso non vengono tagliate */
   container-type: size; /* permette di misurare le card sull'altezza disponibile (cqh) */
 }
 
@@ -431,7 +431,10 @@ body::after {
 /* Faccia visibile della card: si inclina in 3D seguendo il mouse (--rx, --ry da js/main.js) */
 .card__faccia {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* etichetta al centro della carta, svolazzo subito sotto */
+  text-align: center; /* etichette su due righe centrate */
   height: 100%;
   padding: 28px 10px;
   background: var(--sfondo);
@@ -439,25 +442,57 @@ body::after {
   border-radius: 40px;
   color: var(--lilla);
   font-family: "ARP", system-ui, sans-serif;
-  font-size: clamp(18px, 1.6vw, 24px);
+  font-size: 24px;
   font-weight: 600;
   letter-spacing: 2.1px;
-  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  /* --giro: 0deg fronte, 180deg girata (impostato da .card--girata) */
+  transform: rotateX(var(--rx, 0deg)) rotateY(calc(var(--ry, 0deg) + var(--giro, 0deg)));
+  backface-visibility: hidden; /* quando è girata si vede il retro */
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.4s;
 }
 
+/* Retro della card: sta dietro la faccia (ruotato di 180°) e compare quando la card si gira */
+.card__retro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 28px 22px;
+  background: var(--sfondo);
+  box-shadow: inset 0 0 0 7px var(--sfondo), inset 0 0 0 8px var(--lilla);
+  color: var(--lilla);
+  text-align: center;
+  border: 3px solid var(--lilla);
+  border-radius: 40px;
+  transform: rotateX(var(--rx, 0deg)) rotateY(calc(var(--ry, 0deg) + var(--giro, 0deg) + 180deg));
+  backface-visibility: hidden;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .card:hover .card__faccia {
-  background: #1a1b24;
-  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(30px);
+  background-color: #1a1b24; /* solo il colore: lo svolazzo (background-image) resta */
+  transform: rotateX(var(--rx, 0deg)) rotateY(calc(var(--ry, 0deg) + var(--giro, 0deg))) translateZ(30px);
   transition-duration: 0.15s, 0.4s; /* segue il mouse senza ritardo */
 }
+
+/* Card girata al click: rotazione completa, più lenta, ignorando l'inclinazione del mouse */
+.card--girata { --giro: 180deg; --rx: 0deg !important; --ry: 0deg !important; }
+.card.card--girata .card__faccia,
+.card.card--girata .card__retro {
+  transform: rotateY(var(--giro));
+  transition: transform 0.6s cubic-bezier(0.45, 0, 0.2, 1);
+}
+.card.card--girata .card__retro { transform: rotateY(calc(var(--giro) + 180deg)); }
 
 /* Card fuori dall'arco visibile: nascosta, e quando cambia lato salta senza animazione */
 .card--fuori { opacity: 0; pointer-events: none; }
 .card--salto { transition: none; }
 
 /* Apertura a ventaglio iniziale: più lenta della normale rotazione */
-.ruota-area--ventaglio .card { transition-duration: 1.8s, 1.2s; }
+.ruota-area--ventaglio .card { transition-duration: 1.1s, 0.8s; }
 
 .card--attiva { z-index: 1; }
 
@@ -470,7 +505,7 @@ body::after {
 }
 
 .modale::backdrop {
-  background: rgb(17 18 23 / 0.45);
+  background: var(--grana), rgb(17 18 23 / 0.45); /* grana anche sullo sfondo sfocato */
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   animation: dissolvenza 0.3s ease-out;
@@ -479,10 +514,14 @@ body::after {
 .modale__card {
   position: relative;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  gap: 24px;
   width: min(454px, 86vw); /* misura originale del design Figma */
   aspect-ratio: 454 / 574;
-  padding: 40px 10px;
+  padding: 40px 36px;
+  box-shadow: inset 0 0 0 9px var(--sfondo), inset 0 0 0 10px var(--lilla); /* doppio filetto come le card */
   background: var(--sfondo);
   border: 3px solid var(--lilla);
   border-radius: 40px;
@@ -529,7 +568,10 @@ body::after {
 
 @media (prefers-reduced-motion: reduce) {
   .card,
-  .card__faccia { transition: none; }
+  .card__faccia,
+  .card__retro,
+  .card.card--girata .card__faccia,
+  .card.card--girata .card__retro { transition: none; }
   .modale::backdrop,
   .modale__card { animation: none; }
 }
@@ -542,8 +584,9 @@ body::after {
 
 /* Mobile: header su una riga sola, compatta */
 @media (max-width: 768px) {
+  :root { --altezza-header: 64px; }
   .header {
-    height: 64px;
+    height: var(--altezza-header);
     gap: 8px;
     padding: 10px 16px;
   }
@@ -572,4 +615,348 @@ body::after {
   .intro__testi { padding: 0 16px; }
   .intro__saluto,
   .intro__domanda { font-size: 20px; }
+}
+
+/* ---------- Mazzo che si chiude scorrendo ----------
+   Quando si lascia la hero (js/main.js aggiunge .ruota-area--chiusa) le card tornano impilate al centro */
+.ruota-area--chiusa .card { transform: rotate(0deg); }
+
+/* ---------- I miei lavori ---------- */
+.lavori {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: 100dvh;
+  padding: 80px 60px;
+  scroll-snap-align: start;
+  font-family: "ARP", system-ui, sans-serif;
+  text-align: center;
+}
+
+.lavori__titolo {
+  margin: 0;
+  color: var(--lilla);
+  font-size: clamp(32px, min(6vw, 7vh), 60px);
+  font-weight: 600;
+}
+
+.lavori__testo {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: 2.1px;
+}
+
+@media (max-width: 768px) {
+  .lavori { padding: 64px 16px; }
+  .lavori__testo { font-size: 20px; }
+}
+
+/* ---------- Chi sono ---------- */
+.chi-sono {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: clamp(40px, 8vw, 120px);
+  max-width: 1280px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 80px 60px;
+  scroll-snap-align: start;
+}
+
+.chi-sono__foto {
+  justify-self: end;
+  width: min(100%, 420px);
+}
+
+.chi-sono__foto img {
+  width: 100%;
+  height: auto;
+}
+
+.chi-sono__testi { max-width: 640px; }
+
+.chi-sono__etichetta {
+  margin: 0 0 16px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 16px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.chi-sono__titolo {
+  margin: 0 0 40px;
+  color: var(--lilla);
+  font-family: "ARP", system-ui, sans-serif;
+  font-size: clamp(36px, 5vw, 72px);
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.chi-sono__paragrafo {
+  margin: 0 0 20px;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+  .chi-sono {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 64px 16px;
+  }
+  .chi-sono__foto { justify-self: center; width: min(100%, 360px); }
+  .chi-sono__paragrafo { font-size: 16px; }
+}
+
+/* ---------- Footer (Figma node 21:165) ---------- */
+.footer {
+  padding: 53px 96px 29px;
+  font-size: 20px;
+  line-height: 28px;
+}
+
+.footer__colonne {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 48px;
+  padding: 34px 0 50px;
+  border-top: 1px solid rgb(170 154 255 / 0.5);
+}
+
+.footer__contatti {
+  display: flex;
+  flex-direction: column;
+  gap: 33px;
+  width: 548px;
+  max-width: 100%;
+}
+
+.footer__lavoro { width: 304px; }
+
+.footer__gruppo {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.footer__etichetta {
+  margin: 0;
+  color: var(--lilla);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.footer__email {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  min-height: 55px;
+}
+
+.footer__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer__lista li {
+  display: flex;
+  align-items: center;
+  height: 55px;
+}
+
+.footer__link {
+  color: var(--testo);
+  text-decoration: none;
+}
+.footer__link--lilla { color: var(--lilla); }
+.footer__link:hover,
+.footer__link:focus-visible { text-decoration: underline; }
+
+.footer__copia {
+  width: 144px;
+  height: 48px;
+  border: 1px solid var(--lilla);
+  border-radius: 24px;
+  background: var(--sfondo);
+  color: var(--lilla);
+  font: 500 16px/28px "Roboto", system-ui, sans-serif;
+  cursor: pointer;
+}
+.footer__copia:hover { background: var(--menu-attivo); }
+
+.footer__legale {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 35px;
+  border-top: 1px solid rgb(170 154 255 / 0.2);
+  font-size: 16px;
+}
+.footer__legale p { margin: 0; }
+
+.footer__privacy {
+  color: var(--lilla);
+  text-transform: uppercase;
+}
+
+@media (max-width: 1024px) {
+  .footer { padding: 48px 32px 29px; }
+}
+
+@media (max-width: 768px) {
+  .footer { padding: 40px 16px 24px; font-size: 18px; }
+  .footer__lavoro { width: 100%; }
+}
+
+/* ---------- Stile vintage: grana, cornici e svolazzi ---------- */
+/* Grana su tutto il sito (sopra anche la schermata d'apertura): rumore SVG con puntini chiari */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  background-image: var(--grana);
+}
+
+/* Angoli della cornice: stessa immagine, specchiata per ogni angolo */
+.cornice span {
+  position: fixed;
+  z-index: 15;
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+  background: url("../img/angolo.svg") center / contain no-repeat;
+}
+.cornice span:nth-child(1) { top: 10px; left: 10px; }
+.cornice span:nth-child(2) { top: 10px; right: 10px; scale: -1 1; }
+.cornice span:nth-child(3) { bottom: 10px; left: 10px; scale: 1 -1; }
+.cornice span:nth-child(4) { bottom: 10px; right: 10px; scale: -1 -1; }
+
+/* Svolazzo decorativo riutilizzato */
+.intro__domanda::before,
+.lavori__titolo::after,
+.chi-sono__titolo::after {
+  content: "";
+  display: block;
+  width: 160px;
+  height: 29px;
+  background: url("../img/ornamento.svg") center / contain no-repeat;
+}
+.intro__domanda::before { margin: 0 auto 16px; }
+.lavori__titolo::after { margin: 20px auto 0; }
+.chi-sono__titolo::after { margin-top: 24px; }
+
+/* Card come vecchie carte da gioco: doppio filetto interno e svolazzo in basso */
+.card__faccia {
+  background: var(--sfondo);
+  box-shadow: inset 0 0 0 7px var(--sfondo), inset 0 0 0 8px var(--lilla);
+}
+
+/* Foto in una cornice a doppio filetto con lo svolazzo in alto */
+.chi-sono__foto {
+  position: relative;
+  padding: 14px;
+  border: 1px solid var(--lilla);
+  border-radius: 54px;
+  outline: 1px solid var(--lilla);
+  outline-offset: 6px;
+}
+.chi-sono__foto::before {
+  content: "";
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  translate: -50% 0;
+  width: 150px;
+  height: 27px;
+  background: url("../img/ornamento.svg") center / contain no-repeat, var(--sfondo);
+}
+
+/* Footer: svolazzo al centro della linea superiore */
+.footer__colonne { position: relative; }
+.footer__colonne::before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  translate: -50% 0;
+  width: 180px;
+  height: 29px;
+  background: url("../img/ornamento.svg") center / 150px auto no-repeat, var(--sfondo);
+}
+
+@media (max-width: 768px) {
+  .cornice { display: none; } /* su schermi piccoli toccherebbe logo e lingua */
+  .intro__domanda::before { width: 120px; height: 22px; margin-bottom: 10px; }
+}
+
+/* Svolazzo sotto l'etichetta della card */
+.card__faccia::after {
+  content: "";
+  width: 55%;
+  aspect-ratio: 200 / 36;
+  margin-top: 16px;
+  background: url("../img/ornamento.svg") center / contain no-repeat;
+}
+
+/* ---------- Retro della card e modale: stessi testi e stessa cornice ---------- */
+.card__titolo,
+.modale__titolo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  font-family: "ARP", system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 2.1px;
+}
+.card__titolo { font-size: 24px; }
+
+/* Svolazzo sotto il titolo, come sul fronte */
+.card__titolo::after,
+.modale__titolo::after {
+  content: "";
+  width: 55%;
+  aspect-ratio: 200 / 36;
+  margin-top: 16px;
+  background: url("../img/ornamento.svg") center / contain no-repeat;
+}
+
+/* Cornice interna con la descrizione: doppio filetto sottile */
+.card__descrizione,
+.modale__cornice {
+  width: 100%;
+  border: 1px solid var(--lilla);
+  border-radius: 18px;
+  outline: 1px solid rgb(170 154 255 / 0.5);
+  outline-offset: 4px;
+  color: var(--testo);
+  font-family: "Roboto", system-ui, sans-serif;
+  line-height: 1.5;
+  text-align: center;
+}
+.card__descrizione {
+  padding: 12px 10px;
+  font-size: clamp(11px, 0.95vw, 14px);
+}
+.modale__cornice { padding: 24px 22px; }
+.modale__descrizione { margin: 0; font-size: 18px; }
+
+/* Grana anche sulla carta della modale (la modale sta sopra la grana del sito) */
+.modale__card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--grana);
+  pointer-events: none;
 }

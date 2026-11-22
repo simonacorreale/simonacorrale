@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="36" viewBox="0 0 200 36" fill="none" stroke="#AA9AFF" stroke-width="1.5" stroke-linecap="round">
+  <!-- Svolazzo vittoriano simmetrico: metà destra disegnata, sinistra specchiata -->
+  <g id="meta">
+    <path d="M108 18H150"/>
+    <path d="M112 18C122 18 126 8 136 8C144 8 146 16 140 18C136 19 133 15 136 13"/>
+    <path d="M118 18C128 18 132 28 142 28C150 28 152 20 146 18"/>
+    <path d="M150 18C165 18 172 12 182 14C190 16 188 24 182 23"/>
+    <circle cx="193" cy="18" r="1.8" fill="#AA9AFF" stroke="none"/>
+  </g>
+  <use href="#meta" xlink:href="#meta" transform="matrix(-1 0 0 1 200 0)"/>
+  <path d="M100 9L106 18L100 27L94 18Z" fill="#AA9AFF" stroke="none"/>
+</svg>

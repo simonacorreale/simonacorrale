@@ -3,37 +3,42 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Simona Correale — AI Experience Designer</title>
+  <title>Simona Correale — Digital Product Designer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Roboto:wght@400;500&display=swap">
   <link rel="stylesheet" href="css/style.css">
   <!-- Attiva le animazioni d'ingresso solo se JS funziona (senza JS il contenuto resta visibile) -->
   <script>document.documentElement.classList.add('animazioni');</script>
 </head>
 <body>
-  <!-- Schermata d'apertura: bacchetta magica. Scorrendo (o cliccandola) si lancia la magia e parte il sito -->
+  <!-- Schermata d'apertura: bacchetta da prestigiatore con una scia che parte dalla punta.
+       Desktop: la bacchetta segue il mouse; agitandola o scorrendo si entra. Mobile: scorrendo verso il basso.
+       La scia è disegnata nel canvas da js/main.js -->
   <div class="magia" role="dialog" aria-modal="true" aria-labelledby="magia-testo">
+    <canvas class="magia__scia" aria-hidden="true"></canvas>
     <button class="magia__bacchetta" type="button" aria-label="Lancia la magia" data-i18n-aria="lancia">
-      <svg width="110" height="176" viewBox="0 0 100 160" fill="none" aria-hidden="true">
-        <!-- bastoncino -->
-        <rect x="44" y="45" width="12" height="110" rx="6" fill="#F3F2F8"/>
-        <rect x="44" y="118" width="12" height="37" rx="6" fill="#6547EA"/>
-        <rect x="44" y="104" width="12" height="6" fill="#AA9AFF"/>
-        <!-- stella -->
-        <polygon class="magia__stella" points="50,5 57.64,24.48 78.53,25.73 62.36,39.02 67.63,59.27 50,48 32.37,59.27 37.64,39.02 21.47,25.73 42.36,24.48" fill="#AA9AFF"/>
-        <polygon points="50,18 53.5,27 63,27.6 55.7,33.6 58,42.8 50,37.6 42,42.8 44.3,33.6 37,27.6 46.5,27" fill="#D9D5FF"/>
-        <!-- scintille che brillano -->
-        <path class="magia__brillio" d="M12 4 Q12 12 20 12 Q12 12 12 20 Q12 12 4 12 Q12 12 12 4Z" fill="#D9D5FF"/>
-        <path class="magia__brillio" d="M88 52 Q88 58 94 58 Q88 58 88 64 Q88 58 82 58 Q88 58 88 52Z" fill="#AA9AFF"/>
-        <path class="magia__brillio" d="M18 64 Q18 69 23 69 Q18 69 18 74 Q18 69 13 69 Q18 69 18 64Z" fill="#5E44FF"/>
+      <svg width="40" height="150" viewBox="0 0 40 150" fill="none" aria-hidden="true">
+        <!-- bacchetta da prestigiatore: corpo nero, estremità bianche, contorno lilla per staccarla dallo sfondo -->
+        <rect x="14" y="4" width="12" height="142" rx="6" fill="#0B0B0F" stroke="#AA9AFF" stroke-width="1.5"/>
+        <path d="M14 10a6 6 0 0 1 12 0v18H14z" fill="#F3F2F8"/>
+        <path d="M14 122h12v18a6 6 0 0 1-12 0z" fill="#F3F2F8"/>
+        <rect x="17" y="34" width="2" height="82" rx="1" fill="#3B3C48"/>
+        <!-- punto da cui parte la scia -->
+        <circle class="magia__punta" cx="20" cy="6" r="1" fill="none"/>
       </svg>
     </button>
-    <p class="magia__testo" id="magia-testo" data-i18n="magia">Scorri e lancia la magia</p>
+    <p class="magia__testo" id="magia-testo">
+      <span class="magia__testo-desktop" data-i18n="magiaDesktop">Agita la bacchetta o scorri per lanciare la magia</span>
+      <span class="magia__testo-mobile" data-i18n="magia">Scorri e lancia la magia</span>
+    </p>
     <svg class="magia__freccia" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
       <path d="M4 7l6 6 6-6" stroke="#AA9AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
   </div>
+
+  <!-- Cornice vittoriana ai quattro angoli dello schermo -->
+  <div class="cornice" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 
   <header class="header rivela rivela--alto">
     <a class="header__logo" href="#" aria-label="Simona Correale — Home">
@@ -64,15 +69,22 @@
     </div>
   </header>
 
-  <main class="intro">
+  <main>
+  <section class="intro">
     <div class="intro__testi">
-      <p class="intro__saluto rivela" style="--ritardo:0.15s" data-i18n="saluto">Ciao, sono <strong>Simona</strong></p>
-      <h1 class="intro__titolo rivela" style="--ritardo:0.3s">AI Experience Designer</h1>
+      <p class="intro__saluto rivela" style="--ritardo:0.1s" data-i18n="saluto">Ciao, sono <strong>Simona</strong></p>
+      <h1 class="intro__titolo rivela" style="--ritardo:0.2s">Digital Product Designer</h1>
       <p class="intro__domanda rivela" data-dopo-titolo data-i18n="domanda">Di che mi occupo?</p>
-      <!-- Occhio animato: iride e pupilla scorrono a destra e sinistra dentro il contorno -->
+      <!-- Occhio: palpebra superiore (linea dritta) e inferiore (curva). Per sbattere, la palpebra superiore
+           si piega fino a combaciare con quella inferiore e si riapre (animazione SVG <animate>).
+           Iride e pupilla seguono il mouse dentro l'occhio. -->
       <svg class="occhio rivela" data-dopo-titolo width="55" height="27.5" viewBox="0 0 55 27.5" fill="none" aria-hidden="true">
         <clipPath id="occhio-interno">
-          <path d="M3.18437 3C3.45416 5.18673 4.01828 7.3317 4.86495 9.37575C6.09619 12.3482 7.90085 15.0491 10.1759 17.3241C12.4509 19.5992 15.1518 21.4038 18.1243 22.6351C21.0967 23.8663 24.2826 24.5 27.5 24.5C30.7174 24.5 33.9033 23.8663 36.8757 22.6351C39.8482 21.4038 42.5491 19.5992 44.8241 17.3241C47.0992 15.0491 48.9038 12.3482 50.1351 9.37575C50.9817 7.3317 51.5458 5.18673 51.8156 3.00001L3.18437 3Z"/>
+          <path d="M1.5 1.5C3 1.5 52 1.5 53.5 1.5C52 34.2 3 34.2 1.5 1.5Z">
+            <animate attributeName="d" dur="7s" begin="2s" repeatCount="indefinite"
+              keyTimes="0;0.4;0.43;0.46;0.86;0.89;0.92;0.95;0.98;1"
+              values="M1.5 1.5C3 1.5 52 1.5 53.5 1.5C52 34.2 3 34.2 1.5 1.5Z;M1.5 1.5C3 1.5 52 1.5 53.5 1.5C52 34.2 3 34.2 1.5 1.5Z;M1.5 1.5C3 34.2 52 34.2 53.5 1.5C52 34.2 3 34.2 1.5 1.5Z;M1.5 1.5C3 1.5 52 1.5 53.5 1.5C52 34.2 3 34.2 1.5 1.5Z;M1.5 1.5C3 1.5 52 1.5 53.5 1.5C52 34.2 3 34.2 1.5 1.5Z;M1.5 1.5C3 34.2 52 34.2 53.5 1.5C52 34.2 3 34.2 1.5 1.5Z;M1.5 1.5C3 1.5 52 1.5 53.5 1.5C52 34.2 3 34.2 1.5 1.5Z;M1.5 1.5C3 34.2 52 34.2 53.5 1.5C52 34.2 3 34.2 1.5 1.5Z;M1.5 1.5C3 1.5 52 1.5 53.5 1.5C52 34.2 3 34.2 1.5 1.5Z;M1.5 1.5C3 1.5 52 1.5 53.5 1.5C52 34.2 3 34.2 1.5 1.5Z"/>
+          </path>
         </clipPath>
         <g clip-path="url(#occhio-interno)">
           <g class="occhio__iride">
@@ -80,28 +92,101 @@
             <path d="M28.7035 19.3038C28.3138 19.6894 27.6862 19.6894 27.2965 19.3038L23.4534 15.5L20.6352 12.7107C20.0002 12.0823 20.4453 11 21.3387 11L28 11L34.6613 11C35.5547 11 35.9998 12.0823 35.3648 12.7107L32.5466 15.5L28.7035 19.3038Z" fill="#5E44FF"/>
           </g>
         </g>
-        <path d="M3.18437 3C3.45416 5.18673 4.01828 7.3317 4.86495 9.37575C6.09619 12.3482 7.90085 15.0491 10.1759 17.3241C12.4509 19.5992 15.1518 21.4038 18.1243 22.6351C21.0967 23.8663 24.2826 24.5 27.5 24.5C30.7174 24.5 33.9033 23.8663 36.8757 22.6351C39.8482 21.4038 42.5491 19.5992 44.8241 17.3241C47.0992 15.0491 48.9038 12.3482 50.1351 9.37575C50.9817 7.3317 51.5458 5.18673 51.8156 3.00001L3.18437 3ZM0.164126 3C0.447443 5.58156 1.0956 8.1151 2.09331 10.5238C3.47532 13.8603 5.50095 16.8918 8.05457 19.4454C10.6082 21.9991 13.6398 24.0247 16.9762 25.4067C20.3127 26.7887 23.8886 27.5 27.5 27.5C31.1114 27.5 34.6873 26.7887 38.0238 25.4067C41.3602 24.0247 44.3918 21.9991 46.9454 19.4454C49.499 16.8918 51.5247 13.8603 52.9067 10.5238C53.9044 8.1151 54.5526 5.58156 54.8359 3.00001C54.945 2.00567 55 1.0042 55 5.72205e-06L2.40413e-06 2.82114e-06C2.31634e-06 1.0042 0.0549987 2.00566 0.164126 3Z" fill-rule="evenodd" clip-rule="evenodd" fill="#D9D5FF"/>
+        <g stroke="#D9D5FF" stroke-width="3" stroke-linecap="round">
+          <!-- palpebra inferiore -->
+          <path d="M1.5 1.5C3 34.2 52 34.2 53.5 1.5"/>
+          <!-- palpebra superiore: dritta da aperta, curva come quella inferiore da chiusa -->
+          <path d="M1.5 1.5C3 1.5 52 1.5 53.5 1.5">
+            <animate attributeName="d" dur="7s" begin="2s" repeatCount="indefinite"
+              keyTimes="0;0.4;0.43;0.46;0.86;0.89;0.92;0.95;0.98;1"
+              values="M1.5 1.5C3 1.5 52 1.5 53.5 1.5;M1.5 1.5C3 1.5 52 1.5 53.5 1.5;M1.5 1.5C3 34.2 52 34.2 53.5 1.5;M1.5 1.5C3 1.5 52 1.5 53.5 1.5;M1.5 1.5C3 1.5 52 1.5 53.5 1.5;M1.5 1.5C3 34.2 52 34.2 53.5 1.5;M1.5 1.5C3 1.5 52 1.5 53.5 1.5;M1.5 1.5C3 34.2 52 34.2 53.5 1.5;M1.5 1.5C3 1.5 52 1.5 53.5 1.5;M1.5 1.5C3 1.5 52 1.5 53.5 1.5"/>
+          </path>
+        </g>
       </svg>
     </div>
 
     <!-- Ruota di card: JS fa scorrere le card sull'arco e porta al centro quella cliccata -->
+    <!-- Ogni card ha fronte (etichetta) e retro (titolo + descrizione): girata mostra il retro, poi la modale ne riporta i testi.
+         shortcut: descrizioni scritte come prima bozza, da rivedere (anche in inglese, in js/main.js) -->
     <section class="ruota-area rivela" aria-label="Di che mi occupo" data-i18n-aria="ruota">
       <div class="ruota">
-        <button class="card" type="button"><span class="card__faccia">Design System</span></button>
-        <button class="card" type="button"><span class="card__faccia">UX</span></button>
-        <button class="card" type="button"><span class="card__faccia" data-i18n="cardTest">Test</span></button>
-        <button class="card" type="button"><span class="card__faccia">Visual Design</span></button>
-        <button class="card" type="button"><span class="card__faccia">AI</span></button>
-        <button class="card" type="button"><span class="card__faccia">Needle felting</span></button>
+        <button class="card" type="button"><span class="card__faccia">Design System</span><span class="card__retro" aria-hidden="true"><span class="card__titolo">Design System</span><span class="card__descrizione" data-i18n="descDesignSystem">Librerie di componenti, token e regole condivise: un linguaggio unico per progettare interfacce coerenti e scalabili.</span></span></button>
+        <button class="card" type="button"><span class="card__faccia">UX</span><span class="card__retro" aria-hidden="true"><span class="card__titolo">UX</span><span class="card__descrizione" data-i18n="descUx">Ricerca, flussi e architettura dell’informazione per esperienze chiare, che partono dai bisogni reali delle persone.</span></span></button>
+        <button class="card" type="button"><span class="card__faccia" data-i18n="cardTest">Test</span><span class="card__retro" aria-hidden="true"><span class="card__titolo" data-i18n="cardTest">Test</span><span class="card__descrizione" data-i18n="descTest">Test di usabilità e validazione con gli utenti: ogni scelta di design viene verificata prima di andare avanti.</span></span></button>
+        <button class="card" type="button"><span class="card__faccia">Visual Design</span><span class="card__retro" aria-hidden="true"><span class="card__titolo">Visual Design</span><span class="card__descrizione" data-i18n="descVisual">Tipografia, colore e composizione per interfacce riconoscibili, curate in ogni dettaglio.</span></span></button>
+        <button class="card" type="button"><span class="card__faccia">AI</span><span class="card__retro" aria-hidden="true"><span class="card__titolo">AI</span><span class="card__descrizione" data-i18n="descAi">Progettare con e per l’intelligenza artificiale: strumenti, prototipi e interfacce che la rendono utile e comprensibile.</span></span></button>
+        <button class="card" type="button"><span class="card__faccia">Needle felting</span><span class="card__retro" aria-hidden="true"><span class="card__titolo">Needle felting</span><span class="card__descrizione" data-i18n="descFelting">La mia passione manuale: piccoli personaggi in lana infeltrita con l’ago, un punto alla volta.</span></span></button>
       </div>
     </section>
+  </section>
+
+  <!-- Sezione successiva: scorrendo, il mazzo di card della hero si chiude (js/main.js) -->
+  <section class="lavori" id="lavori" aria-labelledby="lavori-titolo">
+    <h2 class="lavori__titolo rivela" id="lavori-titolo" data-i18n="lavori">I miei lavori</h2>
+    <p class="lavori__testo rivela" style="--ritardo:0.1s" data-i18n="lavoriTesto">Presto qui i miei progetti.</p>
+  </section>
+
+  <!-- Chi sono: foto a sinistra, testi a destra -->
+  <section class="chi-sono" id="su-di-me" aria-labelledby="chi-sono-titolo">
+    <!-- Foto -->
+    <div class="chi-sono__foto rivela">
+      <img src="img/simona.png" width="539" height="634" alt="Ritratto di Simona Correale" data-i18n-alt="fotoAlt">
+    </div>
+    <div class="chi-sono__testi">
+      <p class="chi-sono__etichetta rivela" data-i18n="chiSono">Chi sono</p>
+      <h2 class="chi-sono__titolo rivela" style="--ritardo:0.1s" id="chi-sono-titolo" data-i18n="chiSonoTitolo">Titolo della sezione</h2>
+      <!-- shortcut: testi segnaposto, da sostituire con la biografia vera (anche in js/main.js, TESTI) -->
+      <p class="chi-sono__paragrafo rivela" style="--ritardo:0.2s" data-i18n="chiSonoTesto1">Primo paragrafo della tua storia.</p>
+      <p class="chi-sono__paragrafo rivela" style="--ritardo:0.3s" data-i18n="chiSonoTesto2">Secondo paragrafo della tua storia.</p>
+    </div>
+  </section>
   </main>
 
+  <!-- Footer (Figma node 21:165) -->
+  <footer class="footer">
+    <div class="footer__colonne">
+      <div class="footer__contatti">
+        <div class="footer__gruppo">
+          <p class="footer__etichetta" data-i18n="scrivimi">Scrivimi</p>
+          <div class="footer__email">
+            <a class="footer__link footer__link--lilla" href="mailto:simona.correale.work@gmail.com">Simona.correale.work@gmail.com</a>
+            <button class="footer__copia" type="button" data-email="simona.correale.work@gmail.com" data-i18n="copiaEmail">Copia l’email</button>
+          </div>
+        </div>
+        <div class="footer__gruppo">
+          <p class="footer__etichetta" data-i18n="seguimi">Seguimi</p>
+          <!-- shortcut: indirizzi dei profili social da inserire al posto di "#" -->
+          <ul class="footer__lista">
+            <li><a class="footer__link" href="#" target="_blank" rel="noopener">LinkedIn</a></li>
+            <li><a class="footer__link" href="#" target="_blank" rel="noopener">Instagram</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__gruppo footer__lavoro">
+        <p class="footer__etichetta" data-i18n="mioLavoro">Il mio lavoro</p>
+        <ul class="footer__lista">
+          <li><a class="footer__link" href="#su-di-me" data-i18n="chiSono">Chi sono</a></li>
+          <li><a class="footer__link" href="mailto:simona.correale.work@gmail.com" data-i18n="lavoriamo">Lavoriamo insieme</a></li>
+          <!-- shortcut: link al PDF del CV da inserire al posto di "#" -->
+          <li><a class="footer__link" href="#" data-i18n="cv">CV (PDF)</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__legale">
+      <p>© 2026 Simona Correale</p>
+      <a class="footer__privacy" href="#">Privacy</a>
+    </div>
+  </footer>
+
   <!-- Modale: mostra la card in grande con lo sfondo sfocato -->
-  <dialog class="modale" aria-labelledby="modale-titolo">
+  <dialog class="modale" aria-labelledby="modale-titolo" aria-describedby="modale-descrizione">
     <div class="modale__card">
       <button class="modale__chiudi" type="button" aria-label="Chiudi" data-i18n-aria="chiudi">&times;</button>
       <h2 class="modale__titolo" id="modale-titolo"></h2>
+      <!-- Cornice interna con la descrizione della carta pescata -->
+      <div class="modale__cornice">
+        <p class="modale__descrizione" id="modale-descrizione"></p>
+      </div>
     </div>
   </dialog>
 
