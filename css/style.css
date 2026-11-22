@@ -148,10 +148,30 @@ a { color: inherit; }
   .magia__testo-mobile { display: none; }
 }
 
-.magia__freccia { animation: rimbalza 1.4s ease-in-out infinite; }
-@keyframes rimbalza {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(8px); }
+/* Indicatore di scroll: una linea verticale in cui scende un tratto chiaro */
+.magia__scorri { display: flex; justify-content: center; }
+
+.magia__linea {
+  position: relative;
+  width: 1px;
+  height: 40px;
+  overflow: hidden;
+  background: rgb(243 242 248 / 0.2);
+}
+.magia__linea::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--testo);
+  animation: linea-scende 1.6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes linea-scende {
+  from { translate: 0 -100%; }
+  to   { translate: 0 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .magia__linea::after { animation: none; }
 }
 
 /* Lancio: la schermata svanisce */
@@ -436,13 +456,13 @@ body::after {
   justify-content: center; /* etichetta al centro della carta, svolazzo subito sotto */
   text-align: center; /* etichette su due righe centrate */
   height: 100%;
-  padding: 28px 10px;
+  padding: 28px 36px; /* margine dalla cornice del dorso */
   background: var(--sfondo);
   border: 3px solid var(--lilla);
   border-radius: 40px;
   color: var(--lilla);
   font-family: "ARP", system-ui, sans-serif;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   letter-spacing: 2.1px;
   /* --giro: 0deg fronte, 180deg girata (impostato da .card--girata) */
@@ -460,7 +480,7 @@ body::after {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 28px 22px;
+  padding: 34px 26px;
   background: var(--sfondo);
   box-shadow: inset 0 0 0 7px var(--sfondo), inset 0 0 0 8px var(--lilla);
   color: var(--lilla);
@@ -680,7 +700,7 @@ body::after {
 
 .chi-sono__etichetta {
   margin: 0 0 16px;
-  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-family: "ARP", system-ui, sans-serif;
   font-size: 16px;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -745,7 +765,7 @@ body::after {
 .footer__etichetta {
   margin: 0;
   color: var(--lilla);
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-family: "ARP", system-ui, sans-serif;
   font-size: 18px;
   font-weight: 500;
   letter-spacing: 1px;
@@ -855,10 +875,10 @@ body::before {
 .lavori__titolo::after { margin: 20px auto 0; }
 .chi-sono__titolo::after { margin-top: 24px; }
 
-/* Card come vecchie carte da gioco: doppio filetto interno e svolazzo in basso */
+/* Card come vecchie carte da gioco: sul dorso la cornice decorativa (.card__faccia::before, più in basso) */
 .card__faccia {
+  position: relative;
   background: var(--sfondo);
-  box-shadow: inset 0 0 0 7px var(--sfondo), inset 0 0 0 8px var(--lilla);
 }
 
 /* Foto in una cornice a doppio filetto con lo svolazzo in alto */
@@ -919,7 +939,7 @@ body::before {
   font-weight: 600;
   letter-spacing: 2.1px;
 }
-.card__titolo { font-size: 24px; }
+.card__titolo { font-size: 22px; }
 
 /* Svolazzo sotto il titolo, come sul fronte */
 .card__titolo::after,
@@ -960,3 +980,18 @@ body::before {
   background: var(--grana);
   pointer-events: none;
 }
+
+/* Cornice decorativa sul dorso (il lato con l'etichetta): angoli fissi, lati che si allungano con la carta */
+.card__faccia::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 40px solid transparent;
+  border-image: url("../img/cornice-retro.svg") 40 / 40px stretch;
+  pointer-events: none;
+}
+
+/* Footer: il blocco delle colonne sta al centro, i testi dentro restano allineati a sinistra */
+.footer__colonne { justify-content: center; gap: 48px 120px; }
+.footer__contatti,
+.footer__lavoro { width: auto; }

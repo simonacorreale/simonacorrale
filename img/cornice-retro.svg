@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="120" height="120" viewBox="0 0 120 120" fill="none" stroke="#AA9AFF" stroke-linecap="round">
+  <!-- Cornice del dorso delle card: doppia linea con angoli rientranti e riccioli.
+       Usata come border-image (taglio a 40px): gli angoli restano fissi, i lati si allungano -->
+  <path stroke-width="2" d="M30 4H90A26 26 0 0 0 116 30V90A26 26 0 0 0 90 116H30A26 26 0 0 0 4 90V30A26 26 0 0 0 30 4Z"/>
+  <path stroke-width="1" d="M34.6 9H85.4A31 31 0 0 0 111 34.6V85.4A31 31 0 0 0 85.4 111H34.6A31 31 0 0 0 9 85.4V34.6A31 31 0 0 0 34.6 9Z"/>
+  <g id="ricciolo" stroke-width="1.2">
+    <path d="M3 17C3 9 9 3 17 3"/>
+    <path d="M8 16C7 10 10 7 15 8C18 9 17 13 14 13"/>
+    <circle cx="20" cy="20" r="1.4" fill="#AA9AFF" stroke="none"/>
+  </g>
+  <use href="#ricciolo" xlink:href="#ricciolo" transform="matrix(-1 0 0 1 120 0)"/>
+  <use href="#ricciolo" xlink:href="#ricciolo" transform="matrix(1 0 0 -1 0 120)"/>
+  <use href="#ricciolo" xlink:href="#ricciolo" transform="matrix(-1 0 0 -1 120 120)"/>
+</svg>

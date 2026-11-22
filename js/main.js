@@ -217,6 +217,7 @@ function disponi() {
     }
     c.classList.toggle('card--fuori', Math.abs(d) > VISIBILI);
     c.classList.toggle('card--attiva', d === 0);
+    c.style.zIndex = 10 - Math.abs(d); // le card più vicine al centro stanno sopra, uguale sui due lati
     c.setAttribute('aria-current', d === 0);
   });
 }
@@ -303,6 +304,7 @@ area.addEventListener('keydown', (e) => {
 // Rotazione automatica lenta: si ferma con il mouse sopra, e non parte se l'utente preferisce meno animazioni
 const menoMovimento = matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (menoMovimento) occhio.pauseAnimations(); // l'occhio resta aperto, senza sbattere
+
 let timer;
 function riavviaAuto() {
   clearInterval(timer);

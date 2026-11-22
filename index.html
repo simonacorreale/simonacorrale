@@ -6,7 +6,7 @@
   <title>Simona Correale — Digital Product Designer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Roboto:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
   <link rel="stylesheet" href="css/style.css">
   <!-- Attiva le animazioni d'ingresso solo se JS funziona (senza JS il contenuto resta visibile) -->
   <script>document.documentElement.classList.add('animazioni');</script>
@@ -32,9 +32,10 @@
       <span class="magia__testo-desktop" data-i18n="magiaDesktop">Agita la bacchetta o scorri per lanciare la magia</span>
       <span class="magia__testo-mobile" data-i18n="magia">Scorri e lancia la magia</span>
     </p>
-    <svg class="magia__freccia" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M4 7l6 6 6-6" stroke="#AA9AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
+    <!-- Indicatore di scroll: linea con un tratto che scende -->
+    <div class="magia__scorri" aria-hidden="true">
+      <span class="magia__linea"></span>
+    </div>
   </div>
 
   <!-- Cornice vittoriana ai quattro angoli dello schermo -->
@@ -155,9 +156,9 @@
         </div>
         <div class="footer__gruppo">
           <p class="footer__etichetta" data-i18n="seguimi">Seguimi</p>
-          <!-- shortcut: indirizzi dei profili social da inserire al posto di "#" -->
+          <!-- shortcut: indirizzo di Instagram da inserire al posto di "#" -->
           <ul class="footer__lista">
-            <li><a class="footer__link" href="#" target="_blank" rel="noopener">LinkedIn</a></li>
+            <li><a class="footer__link" href="https://www.linkedin.com/notifications/" target="_blank" rel="noopener">LinkedIn</a></li>
             <li><a class="footer__link" href="#" target="_blank" rel="noopener">Instagram</a></li>
           </ul>
         </div>
