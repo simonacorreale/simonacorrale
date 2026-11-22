@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simona Correale — AI Experience Designer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Attiva le animazioni d'ingresso solo se JS funziona (senza JS il contenuto resta visibile) -->
+  <script>document.documentElement.classList.add('animazioni');</script>
+</head>
+<body>
+  <!-- Schermata d'apertura: bacchetta magica. Scorrendo (o cliccandola) si lancia la magia e parte il sito -->
+  <div class="magia" role="dialog" aria-modal="true" aria-labelledby="magia-testo">
+    <button class="magia__bacchetta" type="button" aria-label="Lancia la magia" data-i18n-aria="lancia">
+      <svg width="110" height="176" viewBox="0 0 100 160" fill="none" aria-hidden="true">
+        <!-- bastoncino -->
+        <rect x="44" y="45" width="12" height="110" rx="6" fill="#F3F2F8"/>
+        <rect x="44" y="118" width="12" height="37" rx="6" fill="#6547EA"/>
+        <rect x="44" y="104" width="12" height="6" fill="#AA9AFF"/>
+        <!-- stella -->
+        <polygon class="magia__stella" points="50,5 57.64,24.48 78.53,25.73 62.36,39.02 67.63,59.27 50,48 32.37,59.27 37.64,39.02 21.47,25.73 42.36,24.48" fill="#AA9AFF"/>
+        <polygon points="50,18 53.5,27 63,27.6 55.7,33.6 58,42.8 50,37.6 42,42.8 44.3,33.6 37,27.6 46.5,27" fill="#D9D5FF"/>
+        <!-- scintille che brillano -->
+        <path class="magia__brillio" d="M12 4 Q12 12 20 12 Q12 12 12 20 Q12 12 4 12 Q12 12 12 4Z" fill="#D9D5FF"/>
+        <path class="magia__brillio" d="M88 52 Q88 58 94 58 Q88 58 88 64 Q88 58 82 58 Q88 58 88 52Z" fill="#AA9AFF"/>
+        <path class="magia__brillio" d="M18 64 Q18 69 23 69 Q18 69 18 74 Q18 69 13 69 Q18 69 18 64Z" fill="#5E44FF"/>
+      </svg>
+    </button>
+    <p class="magia__testo" id="magia-testo" data-i18n="magia">Scorri e lancia la magia</p>
+    <svg class="magia__freccia" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M4 7l6 6 6-6" stroke="#AA9AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <header class="header rivela rivela--alto">
+    <a class="header__logo" href="#" aria-label="Simona Correale — Home">
+      <img src="img/logo.svg" width="138" height="28.5325" alt="">
+    </a>
+
+    <!-- Testi traducibili: data-i18n (testo) e data-i18n-aria (aria-label), dizionario in js/main.js -->
+    <nav class="nav" aria-label="Principale" data-i18n-aria="nav">
+      <a class="nav__link nav__link--attivo" href="#" aria-current="page">Home</a>
+      <a class="nav__link" href="#su-di-me" data-i18n="suDiMe">Su di me</a>
+    </nav>
+
+    <div class="lingua">
+      <button class="lingua__attuale" type="button" aria-expanded="false" aria-controls="menu-lingue"
+              aria-label="Lingua: Italiano" data-i18n-aria="linguaAria">
+        <span class="lingua__nome" data-i18n="lingua">Italiano</span>
+        <span class="lingua__sigla" data-i18n="linguaSigla">IT</span>
+        <img class="lingua__freccia" src="img/freccia-menu.svg" width="16" height="16" alt="">
+      </button>
+      <ul class="lingua__menu" id="menu-lingue" hidden>
+        <li><a class="lingua__voce lingua__voce--selezionata" href="#" lang="it" data-lingua="it" aria-current="true">
+          Italiano <img src="img/spunta.svg" width="16" height="16" alt="">
+        </a></li>
+        <li><a class="lingua__voce" href="#" lang="en" data-lingua="en">
+          English <img src="img/spunta.svg" width="16" height="16" alt="">
+        </a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="intro">
+    <div class="intro__testi">
+      <p class="intro__saluto rivela" style="--ritardo:0.15s" data-i18n="saluto">Ciao, sono <strong>Simona</strong></p>
+      <h1 class="intro__titolo rivela" style="--ritardo:0.3s">AI Experience Designer</h1>
+      <p class="intro__domanda rivela" data-dopo-titolo data-i18n="domanda">Di che mi occupo?</p>
+      <!-- Occhio animato: iride e pupilla scorrono a destra e sinistra dentro il contorno -->
+      <svg class="occhio rivela" data-dopo-titolo width="55" height="27.5" viewBox="0 0 55 27.5" fill="none" aria-hidden="true">
+        <clipPath id="occhio-interno">
+          <path d="M3.18437 3C3.45416 5.18673 4.01828 7.3317 4.86495 9.37575C6.09619 12.3482 7.90085 15.0491 10.1759 17.3241C12.4509 19.5992 15.1518 21.4038 18.1243 22.6351C21.0967 23.8663 24.2826 24.5 27.5 24.5C30.7174 24.5 33.9033 23.8663 36.8757 22.6351C39.8482 21.4038 42.5491 19.5992 44.8241 17.3241C47.0992 15.0491 48.9038 12.3482 50.1351 9.37575C50.9817 7.3317 51.5458 5.18673 51.8156 3.00001L3.18437 3Z"/>
+        </clipPath>
+        <g clip-path="url(#occhio-interno)">
+          <g class="occhio__iride">
+            <circle cx="28" cy="13.5" r="13" fill="#D9D5FF"/>
+            <path d="M28.7035 19.3038C28.3138 19.6894 27.6862 19.6894 27.2965 19.3038L23.4534 15.5L20.6352 12.7107C20.0002 12.0823 20.4453 11 21.3387 11L28 11L34.6613 11C35.5547 11 35.9998 12.0823 35.3648 12.7107L32.5466 15.5L28.7035 19.3038Z" fill="#5E44FF"/>
+          </g>
+        </g>
+        <path d="M3.18437 3C3.45416 5.18673 4.01828 7.3317 4.86495 9.37575C6.09619 12.3482 7.90085 15.0491 10.1759 17.3241C12.4509 19.5992 15.1518 21.4038 18.1243 22.6351C21.0967 23.8663 24.2826 24.5 27.5 24.5C30.7174 24.5 33.9033 23.8663 36.8757 22.6351C39.8482 21.4038 42.5491 19.5992 44.8241 17.3241C47.0992 15.0491 48.9038 12.3482 50.1351 9.37575C50.9817 7.3317 51.5458 5.18673 51.8156 3.00001L3.18437 3ZM0.164126 3C0.447443 5.58156 1.0956 8.1151 2.09331 10.5238C3.47532 13.8603 5.50095 16.8918 8.05457 19.4454C10.6082 21.9991 13.6398 24.0247 16.9762 25.4067C20.3127 26.7887 23.8886 27.5 27.5 27.5C31.1114 27.5 34.6873 26.7887 38.0238 25.4067C41.3602 24.0247 44.3918 21.9991 46.9454 19.4454C49.499 16.8918 51.5247 13.8603 52.9067 10.5238C53.9044 8.1151 54.5526 5.58156 54.8359 3.00001C54.945 2.00567 55 1.0042 55 5.72205e-06L2.40413e-06 2.82114e-06C2.31634e-06 1.0042 0.0549987 2.00566 0.164126 3Z" fill-rule="evenodd" clip-rule="evenodd" fill="#D9D5FF"/>
+      </svg>
+    </div>
+
+    <!-- Ruota di card: JS fa scorrere le card sull'arco e porta al centro quella cliccata -->
+    <section class="ruota-area rivela" aria-label="Di che mi occupo" data-i18n-aria="ruota">
+      <div class="ruota">
+        <button class="card" type="button"><span class="card__faccia">Design System</span></button>
+        <button class="card" type="button"><span class="card__faccia">UX</span></button>
+        <button class="card" type="button"><span class="card__faccia" data-i18n="cardTest">Test</span></button>
+        <button class="card" type="button"><span class="card__faccia">Visual Design</span></button>
+        <button class="card" type="button"><span class="card__faccia">AI</span></button>
+        <button class="card" type="button"><span class="card__faccia">Needle felting</span></button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modale: mostra la card in grande con lo sfondo sfocato -->
+  <dialog class="modale" aria-labelledby="modale-titolo">
+    <div class="modale__card">
+      <button class="modale__chiudi" type="button" aria-label="Chiudi" data-i18n-aria="chiudi">&times;</button>
+      <h2 class="modale__titolo" id="modale-titolo"></h2>
+    </div>
+  </dialog>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

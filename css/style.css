@@ -1,0 +1,575 @@
+/* ---------- Font ---------- */
+@font-face {
+  font-family: "ARP";
+  src: url("../fonts/ARP-80.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ARP";
+  src: url("../fonts/ARP-150.ttf") format("truetype");
+  font-weight: 600;
+  font-display: swap;
+}
+
+/* ---------- Colori (dal design Figma, dark mode) ---------- */
+:root {
+  --sfondo: #111217;
+  --testo: #f3f2f8;
+  --lilla: #aa9aff;
+  --viola: #6547ea;
+  --menu-sfondo: #202129;
+  --menu-bordo: #3b3c48;
+  --menu-attivo: #34304d;
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+/* ---------- Animazioni d'ingresso ----------
+   Gli elementi .rivela compaiono salendo quando entrano nello schermo
+   (js/main.js aggiunge .visibile). --ritardo crea l'effetto a cascata. */
+.animazioni .rivela {
+  opacity: 0;
+  translate: 0 40px;
+  transition:
+    opacity 0.9s ease-out var(--ritardo, 0s),
+    translate 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--ritardo, 0s);
+}
+.animazioni .rivela--alto { translate: 0 -30px; } /* l'header scende dall'alto */
+.animazioni .rivela.visibile { opacity: 1; translate: none; }
+.animazioni .rivela:not(.visibile) { pointer-events: none; } /* invisibile = non cliccabile */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .animazioni .rivela { opacity: 1; translate: none; transition: none; }
+  html.animazioni .intro__titolo .lettera,
+  html.animazioni .intro__titolo.visibile .lettera { opacity: 1; color: var(--lilla); animation: none; }
+  html.animazioni .occhio.visibile { animation: none; }
+}
+
+body {
+  margin: 0;
+  background: var(--sfondo);
+  color: var(--testo);
+  font-family: "Roboto", system-ui, sans-serif;
+  overflow-x: hidden;
+  /* La pagina è alta quanto la finestra: header + intro, le card prendono lo spazio che resta */
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+img { display: block; }
+
+a { color: inherit; }
+
+/* ---------- Schermata d'apertura: bacchetta magica ---------- */
+/* Visibile solo con JS attivo (senza JS si vede direttamente il sito) */
+.magia { display: none; }
+
+.animazioni .magia {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  background: var(--sfondo);
+  transition: opacity 0.8s ease;
+}
+
+.intro-attiva { overflow: hidden; } /* niente scroll della pagina finché c'è la bacchetta */
+
+.magia__bacchetta {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  animation: bacchetta-fluttua 3s ease-in-out infinite;
+}
+.magia__bacchetta svg { display: block; transform: rotate(25deg); }
+.magia__bacchetta:focus-visible { outline: 3px dashed var(--lilla); outline-offset: 12px; border-radius: 20px; }
+
+@keyframes bacchetta-fluttua {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50%      { transform: translateY(-16px) rotate(5deg); }
+}
+
+/* Le scintille attorno alla stella brillano a turno */
+.magia__brillio {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: brilla 1.8s ease-in-out infinite;
+}
+.magia__brillio:nth-of-type(2) { animation-delay: -0.6s; }
+.magia__brillio:nth-of-type(3) { animation-delay: -1.2s; }
+
+@keyframes brilla {
+  0%, 100% { opacity: 0.25; transform: scale(0.5); }
+  50%      { opacity: 1; transform: scale(1.1); }
+}
+
+.magia__testo {
+  margin: 0;
+  color: var(--testo);
+  font-family: "ARP", system-ui, sans-serif;
+  font-size: 24px;
+  letter-spacing: 2.1px;
+  text-align: center;
+}
+
+.magia__freccia { animation: rimbalza 1.4s ease-in-out infinite; }
+@keyframes rimbalza {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(8px); }
+}
+
+/* Lancio: colpo di bacchetta, poi la schermata svanisce */
+.magia--lancio .magia__bacchetta { animation: bacchetta-colpo 0.6s cubic-bezier(0.3, 1.5, 0.5, 1) forwards; }
+@keyframes bacchetta-colpo {
+  0%   { transform: none; }
+  40%  { transform: translateY(-12px) rotate(-28deg); }
+  100% { transform: translateY(-4px) rotate(18deg) scale(1.08); }
+}
+.magia--chiusura { opacity: 0; pointer-events: none; }
+
+/* Scintille che esplodono dalla stella (create da js/main.js) */
+.magia__scintilla {
+  position: fixed;
+  z-index: 101;
+  left: var(--x);
+  top: var(--y);
+  color: var(--colore);
+  font-size: var(--dim);
+  line-height: 1;
+  pointer-events: none;
+  animation: esplodi 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+@keyframes esplodi {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(0.3); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(200deg); }
+}
+
+/* ---------- Header ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 84px;
+  flex-shrink: 0;
+  padding: 10px 60px;
+  position: relative;
+  z-index: 20; /* il menu lingue resta sopra il resto della pagina */
+}
+
+.nav {
+  display: flex;
+  padding: 4px 0;
+  border-radius: 40px;
+  backdrop-filter: blur(35px);
+}
+
+.nav__link {
+  width: 106.5px;
+  padding: 4px 10px;
+  color: var(--lilla);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: -0.1px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.nav__link--attivo {
+  text-decoration: underline 2px;
+  text-underline-offset: 6px;
+}
+
+.nav__link:hover { color: var(--testo); }
+
+/* Selettore lingua */
+.lingua { position: relative; }
+
+.lingua__attuale {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 162px;
+  height: 45px;
+  border: 0;
+  border-radius: 40px;
+  background: var(--viola);
+  color: #fff;
+  font: inherit;
+  font-size: 20px;
+  line-height: 1.45;
+  letter-spacing: -0.1px;
+  cursor: pointer;
+}
+
+.lingua__sigla { display: none; } /* sigla "IT"/"EN" mostrata solo su mobile */
+
+.lingua__freccia {
+  transform: rotate(180deg); /* chiuso: freccia in giù */
+  transition: transform 0.2s;
+}
+.lingua__attuale[aria-expanded="true"] .lingua__freccia { transform: none; }
+
+.lingua__menu {
+  position: absolute;
+  top: 53px;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 162px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--menu-sfondo);
+  border: 1px solid var(--menu-bordo);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.36);
+}
+.lingua__menu[hidden] { display: none; }
+
+.lingua__voce {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 9px;
+  font-size: 16px;
+  line-height: 24px;
+  text-decoration: none;
+}
+.lingua__voce:hover { background: var(--menu-attivo); }
+.lingua__voce--selezionata { background: var(--menu-attivo); color: var(--lilla); }
+.lingua__voce:not(.lingua__voce--selezionata) img { display: none; } /* spunta solo sulla lingua attiva */
+
+/* ---------- Intro ---------- */
+.intro {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: clip; /* le animazioni d'ingresso (elementi che salgono dal basso) non creano scroll */
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  /* Spazi del design (80 e 100px) sugli schermi alti, più stretti su quelli bassi */
+  gap: min(80px, 5vh);
+  padding: min(100px, 7vh) 0 0;
+}
+
+/* Vignettatura: sfumatura radiale trasparente al centro e scura ai bordi, per dare focus alla parte centrale.
+   Copre tutta la finestra: sopra le card (anche quelle laterali sfumano) ma sotto l'header (z-index 20). */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none; /* non blocca i click */
+  background: radial-gradient(ellipse 70% 75% at 50% 50%, transparent 45%, rgb(4 4 7 / 0.85) 100%);
+}
+
+.intro__testi {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 0 60px;
+  font-family: "ARP", system-ui, sans-serif;
+  text-align: center;
+}
+
+.intro__testi p,
+.intro__titolo { margin: 0; }
+
+.intro__saluto,
+.intro__domanda { letter-spacing: 2.1px; }
+
+.intro__saluto { font-size: 30px; }
+.intro__domanda { font-size: 24px; }
+
+.intro__saluto strong { font-weight: 600; }
+
+/* Titolo "magico": js/main.js divide il testo in .lettera (--i = posizione).
+   1. ogni lettera entra fluttuando, una dopo l'altra, solo contorno
+   2. quando sono tutte arrivate si riempiono in sequenza con un bagliore */
+.animazioni .intro__titolo.rivela { opacity: 1; translate: none; transition: none; } /* lo animano le lettere */
+
+.intro__titolo .parola { display: inline-block; white-space: nowrap; } /* niente parole spezzate a capo */
+
+.animazioni .intro__titolo .lettera {
+  display: inline-block;
+  opacity: 0;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--lilla);
+}
+
+.animazioni .intro__titolo.visibile .lettera {
+  --entrata: calc(0.3s + var(--i) * 0.05s);  /* cascata lettera per lettera */
+  --riempi: calc(2.1s + var(--i) * 0.04s);   /* parte quando tutte sono arrivate */
+  animation:
+    lettera-fluttua 1.1s cubic-bezier(0.3, 1.3, 0.5, 1) var(--entrata) both,
+    lettera-riempi 0.7s ease-out var(--riempi) forwards;
+}
+
+@keyframes lettera-fluttua {
+  0%   { opacity: 0; transform: translateY(0.6em) rotate(-8deg); filter: blur(6px); }
+  55%  { opacity: 1; transform: translateY(-0.15em) rotate(3deg); filter: blur(0); }
+  78%  { transform: translateY(0.05em) rotate(-1deg); }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+
+@keyframes lettera-riempi {
+  0%   { color: transparent; text-shadow: none; }
+  45%  { color: var(--lilla); text-shadow: 0 0 18px rgb(170 154 255 / 0.9), 0 0 4px #fff; }
+  100% { color: var(--lilla); text-shadow: none; }
+}
+
+.intro__titolo {
+  color: var(--lilla);
+  font-size: clamp(32px, min(6vw, 7vh), 60px);
+  font-weight: 600;
+  letter-spacing: 4.2px;
+}
+
+/* ---------- Occhio animato ---------- */
+.occhio { display: block; }
+
+.occhio__iride {
+  animation: guarda 4s ease-in-out infinite;
+}
+
+/* Guarda a sinistra, si ferma, guarda a destra, si ferma, torna al centro */
+@keyframes guarda {
+  0%, 10%   { transform: translateX(0); }
+  25%, 40%  { transform: translateX(-11px); }
+  60%, 75%  { transform: translateX(11px); }
+  90%, 100% { transform: translateX(0); }
+}
+
+/* Entrata "magica" dell'occhio: da piccolo, ruotato e sfocato a grande con bagliore, poi si assesta */
+.animazioni .occhio.rivela { translate: none; transition: none; }
+.animazioni .occhio.visibile {
+  animation: occhio-magia 1.2s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+@keyframes occhio-magia {
+  0%   { opacity: 0; transform: scale(0.2) rotate(-30deg); filter: blur(8px); }
+  50%  { opacity: 1; transform: scale(1.3) rotate(8deg); filter: blur(0) drop-shadow(0 0 14px rgb(170 154 255 / 0.95)); }
+  75%  { transform: scale(0.94) rotate(-3deg); filter: drop-shadow(0 0 8px rgb(170 154 255 / 0.6)); }
+  100% { opacity: 1; transform: none; filter: none; }
+}
+
+/* Quando il mouse si muove, l'occhio guarda il cursore (--ox, --oy da js/main.js) */
+.occhio--segue .occhio__iride {
+  animation: none;
+  transform: translate(var(--ox, 0px), var(--oy, 0px));
+  transition: transform 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .occhio__iride { animation: none; }
+}
+
+/* ---------- Ruota di card ---------- */
+/* Le card stanno su un arco di cerchio molto grande (sotto lo schermo):
+   la card al centro è dritta, le altre scendono e si inclinano ai lati. */
+.ruota-area {
+  --passo: 20deg; /* distanza angolare tra due card: più basso = card più vicine */
+  position: relative;
+  flex: 1;           /* occupa lo spazio rimasto sotto i testi */
+  min-height: 220px;
+  width: 100%;
+  overflow: hidden;
+  container-type: size; /* permette di misurare le card sull'altezza disponibile (cqh) */
+}
+
+.ruota {
+  /* Larghezza card: quella del design, ma mai più del 66% dell'altezza disponibile */
+  --card-w: min(clamp(170px, 22vw, 320px), 66cqh);
+  --card-h: calc(var(--card-w) * 574 / 454);
+  --raggio: calc(var(--card-w) * 2.6);
+  position: absolute;
+  left: 50%;
+  top: calc(var(--card-h) / 2 + var(--raggio) + 20px); /* centro del cerchio */
+}
+
+.card {
+  position: absolute;
+  left: calc(var(--card-w) / -2);
+  top: calc((var(--raggio) + var(--card-h) / 2) * -1);
+  width: var(--card-w);
+  height: var(--card-h);
+  padding: 0;
+  border: 0;
+  border-radius: 40px;
+  background: none;
+  cursor: pointer;
+  perspective: 800px; /* profondità per l'inclinazione 3D della faccia */
+  transform-origin: 50% calc(var(--raggio) + var(--card-h) / 2);
+  /* --d = distanza dalla card centrale (-3…3), impostata da js/main.js */
+  transform: rotate(calc(var(--d, 0) * var(--passo)));
+  transition:
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.4s;
+}
+
+/* Faccia visibile della card: si inclina in 3D seguendo il mouse (--rx, --ry da js/main.js) */
+.card__faccia {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  padding: 28px 10px;
+  background: var(--sfondo);
+  border: 3px solid var(--lilla);
+  border-radius: 40px;
+  color: var(--lilla);
+  font-family: "ARP", system-ui, sans-serif;
+  font-size: clamp(18px, 1.6vw, 24px);
+  font-weight: 600;
+  letter-spacing: 2.1px;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.4s;
+}
+
+.card:hover .card__faccia {
+  background: #1a1b24;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(30px);
+  transition-duration: 0.15s, 0.4s; /* segue il mouse senza ritardo */
+}
+
+/* Card fuori dall'arco visibile: nascosta, e quando cambia lato salta senza animazione */
+.card--fuori { opacity: 0; pointer-events: none; }
+.card--salto { transition: none; }
+
+/* Apertura a ventaglio iniziale: più lenta della normale rotazione */
+.ruota-area--ventaglio .card { transition-duration: 1.8s, 1.2s; }
+
+.card--attiva { z-index: 1; }
+
+/* ---------- Modale con la card in dettaglio ---------- */
+.modale {
+  padding: 0;
+  border: 0;
+  background: none;
+  overflow: visible;
+}
+
+.modale::backdrop {
+  background: rgb(17 18 23 / 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: dissolvenza 0.3s ease-out;
+}
+
+.modale__card {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: min(454px, 86vw); /* misura originale del design Figma */
+  aspect-ratio: 454 / 574;
+  padding: 40px 10px;
+  background: var(--sfondo);
+  border: 3px solid var(--lilla);
+  border-radius: 40px;
+  animation: entrata 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modale__titolo {
+  margin: 0;
+  color: var(--lilla);
+  font-family: "ARP", system-ui, sans-serif;
+  font-size: clamp(22px, 6vw, 30px);
+  font-weight: 600;
+  letter-spacing: 2.1px;
+  text-align: center;
+}
+
+.modale__chiudi {
+  position: absolute;
+  top: -52px;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--viola);
+  color: #fff;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@keyframes dissolvenza {
+  from { opacity: 0; }
+}
+
+@keyframes entrata {
+  from { opacity: 0; transform: scale(0.85) translateY(20px); }
+}
+
+.card:focus-visible {
+  outline: 3px dashed var(--testo);
+  outline-offset: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .card__faccia { transition: none; }
+  .modale::backdrop,
+  .modale__card { animation: none; }
+}
+
+/* ---------- Mobile ---------- */
+/* Tablet: stessa header, margini più stretti */
+@media (max-width: 1024px) {
+  .header { padding: 10px 32px; }
+}
+
+/* Mobile: header su una riga sola, compatta */
+@media (max-width: 768px) {
+  .header {
+    height: 64px;
+    gap: 8px;
+    padding: 10px 16px;
+  }
+  .header__logo {
+    width: 32px;      /* il logo disegnato occupa solo i primi 32px del suo riquadro */
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .nav__link {
+    width: auto;
+    padding: 4px 8px;
+    font-size: 16px;
+  }
+  .lingua__attuale {
+    width: auto;
+    height: 38px;
+    gap: 6px;
+    padding: 0 12px 0 16px;
+    font-size: 16px;
+  }
+  .lingua__nome { display: none; }   /* "Italiano" → "IT" */
+  .lingua__sigla { display: inline; }
+  .lingua__menu { left: auto; right: 0; }
+
+  .intro { gap: min(48px, 4vh); padding-top: min(72px, 5vh); }
+  .intro__testi { padding: 0 16px; }
+  .intro__saluto,
+  .intro__domanda { font-size: 20px; }
+}
